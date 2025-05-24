@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "AI Reader Plugin",
+  "version": "1.0",
+  "description": "对选中的文本右键进行 AI 总结",
+  "permissions": ["contextMenus", "activeTab"],
+  "background": {
+    "service_worker": "background.js"
+  }
+}
