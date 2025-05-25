@@ -93,7 +93,7 @@ async function callGLMAPIStream(text, tabId) {
             messages: [
                 {
                     role: "system",
-                    content: "请提炼文章中的核心技术概念、关键实现方法及核心结论，给出大纲，用简洁的中文概括。"
+                    content: "请提炼文章中的核心技术概念、关键实现方法及核心结论，给出大纲，用简洁的中文概括。字数不要超过原文的字数。"
                 },
                 {
                     role: "user",
@@ -154,8 +154,16 @@ async function callGLMAPIStream(text, tabId) {
             }
         }
     }
-    content = document.getElementById('glm-summary');
-    content.innerHTML = markdownToHtml(content.innerHTML);  
+    // 将markdown渲染注入到页面执行，避免background脚本直接操作DOM
+    chrome.scripting.executeScript({
+        target: {tabId},
+        func: function() {
+            let content = document.getElementById('glm-summary');
+            if (content && window.markdownToHtml) {
+                content.innerHTML = window.markdownToHtml(content.innerHTML);
+            }
+        }
+    });
 }
 
 // 只处理**加粗**和换行
