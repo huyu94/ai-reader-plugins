@@ -93,7 +93,7 @@ async function callGLMAPIStream(text, tabId) {
             messages: [
                 {
                     role: "system",
-                    content: "你是一个AI助手，擅长总结与分析,你需要将以下的内容进行中文总结.给出核心内容的大纲,用1,2,3,4来表示,每个小段都要给出合适的总结.最终对总体部分并给出自己的看法。"
+                    content: "请提炼文章中的核心技术概念、关键实现方法及核心结论，给出大纲，用简洁的中文概括。"
                 },
                 {
                     role: "user",
@@ -142,12 +142,8 @@ async function callGLMAPIStream(text, tabId) {
                                                 pre.innerHTML = '';
                                                 window.__aiStreamBuffer = true;
                                             }
-                                            // 只处理**加粗**和换行
-                                            function markdownToHtml(md) {
-                                                if (!md) return '';
-                                                return md.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
-                                            }
-                                            pre.innerHTML += markdownToHtml(chunk);
+
+                                            pre.innerHTML += chunk;
                                         }
                                     }
                                 });
@@ -158,6 +154,22 @@ async function callGLMAPIStream(text, tabId) {
             }
         }
     }
+    content = document.getElementById('glm-summary');
+    content.innerHTML = markdownToHtml(content.innerHTML);  
+}
+
+// 只处理**加粗**和换行
+function markdownToHtml(md) {
+    if (!md) return '';
+    // 标题转换
+    md = md.replace(/^### (.*)$/gm, '<h3>$1</h3>')
+            .replace(/^## (.*)$/gm, '<h2>$1</h2>')
+            .replace(/^# (.*)$/gm, '<h1>$1</h1>');
+    // 加粗
+    md = md.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    // {}内容转为<br>
+    md = md.replace(/\{[^}]*\}/g, '<br>');
+    return md;
 }
 
 
@@ -204,10 +216,3 @@ function displayPopup(summary) {
     if (pre) pre.innerHTML = markdownToHtml(summary);
 }
 
-// 简单的Markdown转HTML（只处理**加粗**）
-function markdownToHtml(md) {
-    if (!md) return '';
-    return md
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\n/g, '<br>');
-}
